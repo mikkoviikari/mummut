@@ -1,3 +1,4 @@
+
 <style>
   #peli { font-family: sans-serif; max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; }
   .kortti { background: var(--color-background-primary, #fff); border: 0.5px solid var(--color-border-tertiary, #ddd); border-radius: 12px; padding: 1.5rem; }
@@ -5,29 +6,29 @@
   .piste { height: 6px; border-radius: 3px; flex: 1; background: #ddd; transition: background 0.3s; }
   .piste.tehty { background: #1D9E75; }
   .piste.aktiivinen { background: #378ADD; }
-  .osio-badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 8px; margin-bottom: 0.75rem; }
+  .osio-badge { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 8px; margin-bottom: 0.75rem; }
   .osio-1 { background: #E6F1FB; color: #0C447C; }
   .osio-2 { background: #E1F5EE; color: #085041; }
-  .kysymys { font-size: 18px; font-weight: 500; color: var(--color-text-primary, #111); line-height: 1.5; margin-bottom: 1.25rem; }
+  .kysymys { font-size: 20px; font-weight: 500; color: var(--color-text-primary, #111); line-height: 1.5; margin-bottom: 1.25rem; }
   .vaihtoehdot { display: flex; flex-direction: column; gap: 10px; }
-  .vaihtoehto { background: var(--color-background-secondary, #f5f5f5); border: 0.5px solid var(--color-border-secondary, #ccc); border-radius: 8px; padding: 0.75rem 1rem; font-size: 15px; cursor: pointer; text-align: left; color: var(--color-text-primary, #111); transition: border-color 0.2s, background 0.2s; }
+  .vaihtoehto { background: var(--color-background-secondary, #f5f5f5); border: 0.5px solid var(--color-border-secondary, #ccc); border-radius: 8px; padding: 1rem 1.25rem; font-size: 17px; cursor: pointer; text-align: left; color: var(--color-text-primary, #111); transition: border-color 0.2s, background 0.2s; }
   .vaihtoehto:hover:not(:disabled) { border-color: #378ADD; background: #E6F1FB; color: #0C447C; }
   .vaihtoehto.oikein { background: #E1F5EE; border-color: #1D9E75; color: #085041; }
   .vaihtoehto.vaarin { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
   .vaihtoehto:disabled { cursor: default; }
-  .palaute { margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 8px; font-size: 14px; line-height: 1.6; display: none; }
+  .palaute { margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 8px; font-size: 15px; line-height: 1.6; display: none; }
   .palaute.nakyvilla { display: block; }
   .palaute.ok { background: #E1F5EE; color: #085041; border: 0.5px solid #5DCAA5; }
   .palaute.ei { background: #FCEBEB; color: #501313; border: 0.5px solid #F09595; }
-  .jatka-btn { margin-top: 1.25rem; padding: 0.7rem 1.75rem; background: #378ADD; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; display: none; }
+  .jatka-btn { margin-top: 1.25rem; padding: 0.7rem 1.75rem; background: #378ADD; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; display: none; }
   .jatka-btn:hover { background: #185FA5; }
-  .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 13px; color: var(--color-text-secondary, #666); }
+  .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 14px; color: var(--color-text-secondary, #666); }
   .pisteet-laskuri { font-weight: 500; color: var(--color-text-primary, #111); }
   .loppu { text-align: center; }
   .loppu .iso-luku { font-size: 52px; font-weight: 500; color: #378ADD; }
   .loppu .tulos-teksti { font-size: 18px; margin: 0.5rem 0 1rem; color: var(--color-text-primary, #111); }
   .loppu .kommentti { font-size: 15px; color: var(--color-text-secondary, #666); line-height: 1.7; margin-bottom: 1.5rem; }
-  .uudelleen-btn { padding: 0.7rem 2rem; background: #378ADD; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; }
+  .uudelleen-btn { padding: 0.7rem 2rem; background: #378ADD; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
   .uudelleen-btn:hover { background: #185FA5; }
 </style>
 
