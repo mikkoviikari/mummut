@@ -1,0 +1,244 @@
+<style>
+  #peli { font-family: sans-serif; max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; }
+  .kortti { background: var(--color-background-primary, #fff); border: 0.5px solid var(--color-border-tertiary, #ddd); border-radius: 12px; padding: 1.5rem; }
+  .edistyminen { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+  .piste { height: 6px; border-radius: 3px; flex: 1; background: #ddd; transition: background 0.3s; }
+  .piste.tehty { background: #1D9E75; }
+  .piste.aktiivinen { background: #378ADD; }
+  .osio-badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 8px; margin-bottom: 0.75rem; }
+  .osio-1 { background: #E6F1FB; color: #0C447C; }
+  .osio-2 { background: #E1F5EE; color: #085041; }
+  .kysymys { font-size: 18px; font-weight: 500; color: var(--color-text-primary, #111); line-height: 1.5; margin-bottom: 1.25rem; }
+  .vaihtoehdot { display: flex; flex-direction: column; gap: 10px; }
+  .vaihtoehto { background: var(--color-background-secondary, #f5f5f5); border: 0.5px solid var(--color-border-secondary, #ccc); border-radius: 8px; padding: 0.75rem 1rem; font-size: 15px; cursor: pointer; text-align: left; color: var(--color-text-primary, #111); transition: border-color 0.2s, background 0.2s; }
+  .vaihtoehto:hover:not(:disabled) { border-color: #378ADD; background: #E6F1FB; color: #0C447C; }
+  .vaihtoehto.oikein { background: #E1F5EE; border-color: #1D9E75; color: #085041; }
+  .vaihtoehto.vaarin { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
+  .vaihtoehto:disabled { cursor: default; }
+  .palaute { margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 8px; font-size: 14px; line-height: 1.6; display: none; }
+  .palaute.nakyvilla { display: block; }
+  .palaute.ok { background: #E1F5EE; color: #085041; border: 0.5px solid #5DCAA5; }
+  .palaute.ei { background: #FCEBEB; color: #501313; border: 0.5px solid #F09595; }
+  .jatka-btn { margin-top: 1.25rem; padding: 0.7rem 1.75rem; background: #378ADD; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; display: none; }
+  .jatka-btn:hover { background: #185FA5; }
+  .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 13px; color: var(--color-text-secondary, #666); }
+  .pisteet-laskuri { font-weight: 500; color: var(--color-text-primary, #111); }
+  .loppu { text-align: center; }
+  .loppu .iso-luku { font-size: 52px; font-weight: 500; color: #378ADD; }
+  .loppu .tulos-teksti { font-size: 18px; margin: 0.5rem 0 1rem; color: var(--color-text-primary, #111); }
+  .loppu .kommentti { font-size: 15px; color: var(--color-text-secondary, #666); line-height: 1.7; margin-bottom: 1.5rem; }
+  .uudelleen-btn { padding: 0.7rem 2rem; background: #378ADD; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; }
+  .uudelleen-btn:hover { background: #185FA5; }
+</style>
+
+<div id="peli">
+  <div id="nakyma-peli">
+    <div class="kortti">
+      <div class="edistyminen" id="edistyminen"></div>
+      <div class="meta">
+        <span id="kysymys-nro">Kysymys 1 / 10</span>
+        <span class="pisteet-laskuri">Pisteet: <span id="pisteet-luku">0</span></span>
+      </div>
+      <div id="osio-badge" class="osio-badge osio-1"></div>
+      <div id="kysymys-teksti" class="kysymys"></div>
+      <div id="vaihtoehdot-alue" class="vaihtoehdot"></div>
+      <div id="palaute-alue" class="palaute"></div>
+      <button class="jatka-btn" id="jatka-nappi" onclick="seuraava()">Seuraava kysymys →</button>
+    </div>
+  </div>
+  <div id="nakyma-loppu" style="display:none;">
+    <div class="kortti loppu">
+      <div style="font-size:13px;color:#666;margin-bottom:0.5rem;">Loppupisteet</div>
+      <div class="iso-luku" id="loppu-pisteet"></div>
+      <div class="tulos-teksti" id="loppu-otsikko"></div>
+      <div class="kommentti" id="loppu-kommentti"></div>
+      <button class="uudelleen-btn" onclick="aloitaAlusta()">Pelaa uudelleen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const kysymykset = [
+  {
+    osio: 1, osioNimi: "Mitä tekoäly on?",
+    tyyppi: "monivalinta",
+    kysymys: "Mistä tekoäly saa tietonsa?",
+    vaihtoehdot: ["Se keksii asiat itse tyhjästä", "Se on oppinut valtavista määristä tekstiä ja tietoa internetistä", "Sillä on yhteys kaikkiin kirjastoihin reaaliajassa", "Ihmiset syöttävät sille tiedot käsin"],
+    oikein: 1,
+    palaute_ok: "Juuri niin! Tekoäly on 'lukenut' miljoonia kirjoja, artikkeleita ja verkkosivuja. Siksi se osaa vastata niin monenlaisiin kysymyksiin.",
+    palaute_ei: "Ei ihan. Tekoäly on oppinut käsittelemällä valtavia määriä tekstiä – kirjoja, artikkeleita, verkkosivuja. Se ei keksi asioita tyhjästä eikä surffaa netissä reaaliajassa."
+  },
+  {
+    osio: 1, osioNimi: "Mitä tekoäly on?",
+    tyyppi: "tosiepaTosi",
+    kysymys: "Tekoäly ymmärtää ja tuntee asioita samalla tavalla kuin ihminen.",
+    vaihtoehdot: ["Tosi", "Epätosi"],
+    oikein: 1,
+    palaute_ok: "Oikein! Tekoäly ei oikeasti 'ymmärrä' tai 'tunne' – se käsittelee tekstiä älykkäästi, mutta sisällä se on hyvin monimutkaista matematiikkaa ilman tietoisuutta.",
+    palaute_ei: "Tämä onkin tärkeä huomio! Vaikka tekoäly vaikuttaa ymmärtävältä, se ei oikeasti tunne tai koe mitään. Se on erittäin kehittynyttä laskentaa."
+  },
+  {
+    osio: 1, osioNimi: "Mitä tekoäly on?",
+    tyyppi: "monivalinta",
+    kysymys: "Mikä näistä kuvaa parhaiten, mitä tekoäly tekee kun kirjoitat sille kysymyksen?",
+    vaihtoehdot: ["Se etsii vastauksen Googlesta", "Se soittaa asiantuntijalle", "Se laskee todennäköisimmän hyödyllisen vastauksen oppimiensa mallien perusteella", "Se kopioi vastauksen jostain kirjasta"],
+    oikein: 2,
+    palaute_ok: "Hyvin selitetty! Tekoäly ei hae tietoa verkosta vaan 'generoi' vastauksen sen perusteella, mitä se on oppinut. Siksi sitä kutsutaan tekoyksi – se luo uutta tekstiä.",
+    palaute_ei: "Hyvä arveilu! Todellisuudessa tekoäly luo vastauksensa itse oppimiensa mallien pohjalta – se ei hae tietoa verkosta tai kopioi mistään."
+  },
+  {
+    osio: 1, osioNimi: "Mitä tekoäly on?",
+    tyyppi: "tosiepaTosi",
+    kysymys: "Tekoäly voi joskus antaa virheellistä tietoa, vaikka se kuulostaa vakuuttavalta.",
+    vaihtoehdot: ["Tosi", "Epätosi"],
+    oikein: 0,
+    palaute_ok: "Tärkeä havainto! Tekoäly voi erehtyä tai 'keksiä' faktoja, jotka kuulostavat uskottavilta. Siksi tärkeissä asioissa kannattaa tarkistaa tieto muualtakin.",
+    palaute_ei: "Tämä on hyvä muistaa: tekoäly voi erehtyä! Se voi antaa vakuuttavan kuuloista mutta väärää tietoa. Lääke- tai oikeusasioissa kannattaa aina kääntyä ammattilaisen puoleen."
+  },
+  {
+    osio: 1, osioNimi: "Mitä tekoäly on?",
+    tyyppi: "monivalinta",
+    kysymys: "Mikä näistä on esimerkki tekoälystä?",
+    vaihtoehdot: ["Tavallinen hakukone kuten Google", "ChatGPT tai Claude, joka vastaa kirjoitettuihin kysymyksiin", "Sähköpostiohjelma", "Nettipankki"],
+    oikein: 1,
+    palaute_ok: "Täsmälleen! ChatGPT ja Claude ovat tunnettuja tekoälyavustajia, joille voi kirjoittaa kysymyksiä ja saada pitkiä, älykkäitä vastauksia.",
+    palaute_ei: "ChatGPT ja Claude ovat hyviä esimerkkejä tekoälystä – ne osaavat käydä vuoropuhelua, kirjoittaa tekstejä ja vastata monenlaisiin kysymyksiin."
+  },
+  {
+    osio: 2, osioNimi: "ChatGPT & Claude käytännössä",
+    tyyppi: "monivalinta",
+    kysymys: "Aino haluaa kirjoittaa syntymäpäiväkortin tyttärelleen mutta sanat eivät löydy. Voiko tekoäly auttaa?",
+    vaihtoehdot: ["Ei, tekoäly osaa vain vastata tietokysymyksiin", "Kyllä! Tekoälylle voi pyytää apua tekstien kirjoittamiseen", "Kyllä, mutta vain englanniksi", "Ei, kortit pitää tilata erikseen"],
+    oikein: 1,
+    palaute_ok: "Mahtavaa! Tekstien kirjoittaminen on yksi tekoälyn parhaita taitoja. Voit pyytää: 'Kirjoita lämmin syntymäpäiväonnitteluviesti 50-vuotiaalle tyttärelleni.'",
+    palaute_ei: "Itse asiassa tekoäly on loistava apuri juuri tällaisessa! Se osaa kirjoittaa runoja, kortteja, viestejä ja paljon muuta – suomeksikin."
+  },
+  {
+    osio: 2, osioNimi: "ChatGPT & Claude käytännössä",
+    tyyppi: "monivalinta",
+    kysymys: "Mikä näistä on paras tapa kysyä tekoälyltä neuvoa?",
+    vaihtoehdot: ["'Ruoka'", "'Mitä voin tehdä ylijääneelle riisille ja porkkanoille?'", "'KERRO MINULLE RESEPTI'", "'Ruokaa, kiitos, nopeasti'"],
+    oikein: 1,
+    palaute_ok: "Juuri niin! Mitä tarkemmin kerrot tilanteesi, sitä paremman vastauksen saat. Tekoäly on kuin avulias tuttava – sille kannattaa selittää kunnolla.",
+    palaute_ei: "Paras tapa on kertoa tilanne selkeästi ja täsmällisesti. Mitä enemmän kerrot, sitä hyödyllisemmän vastauksen saat!"
+  },
+  {
+    osio: 2, osioNimi: "ChatGPT & Claude käytännössä",
+    tyyppi: "tosiepaTosi",
+    kysymys: "Tekoälylle ei kannata kertoa salasanojaan, luottokorttinumeroaan tai muita arkaluonteisia henkilötietoja.",
+    vaihtoehdot: ["Tosi", "Epätosi"],
+    oikein: 0,
+    palaute_ok: "Aivan oikein ja tärkeää! Tekoäly on hyvä apuri monessa asiassa, mutta sille ei pidä kertoa salasanoja, pankkitietoja tai muita arkaluonteisia tietoja.",
+    palaute_ei: "Tämä on erittäin tärkeä turvallisuusvinkki: älä koskaan kerro tekoälylle salasanojasi tai pankkitietojasi. Tekoäly ei tarvitse niitä auttaakseen arkiasioissa."
+  },
+  {
+    osio: 2, osioNimi: "ChatGPT & Claude käytännössä",
+    tyyppi: "monivalinta",
+    kysymys: "Liisa sai tekoälyltä vastauksen lääkkeistä mutta se tuntuu epäilyttävältä. Mitä hänen kannattaa tehdä?",
+    vaihtoehdot: ["Luottaa tekoälyyn, se tietää kaiken", "Tarkistaa asia lääkäriltä tai apteekista", "Kysyä uudelleen tekoälyltä, koska toinen kerta on parempi", "Olla ottamatta lääkettä ollenkaan"],
+    oikein: 1,
+    palaute_ok: "Juuri niin! Tekoäly voi antaa hyvää yleistietoa, mutta terveyteen liittyvissä asioissa lääkäri tai apteekkihenkilökunta on aina paras tiedonlähde.",
+    palaute_ei: "Terveysasioissa kannattaa aina tarkistaa tieto ammattilaiselta. Tekoäly voi antaa yleistietoa, mutta se ei tunne sinun tilannettasi kuten lääkäri."
+  },
+  {
+    osio: 2, osioNimi: "ChatGPT & Claude käytännössä",
+    tyyppi: "monivalinta",
+    kysymys: "Minkä näistä voit pyytää tekoälyä tekemään?",
+    vaihtoehdot: ["Tilaamaan sinulle kaupasta ruokaa", "Selittämään yksinkertaisesti mikä on 'pilvipalvelu'", "Soittamaan lääkäriajan puolestasi", "Maksamaan laskusi"],
+    oikein: 1,
+    palaute_ok: "Täsmälleen! Tekoäly on erinomainen selittämään vaikeilta kuulostavia asioita yksinkertaisella kielellä. Voit pyytää: 'Selitä minulle pilvipalvelu, kuin olisin 70-vuotias.'",
+    palaute_ei: "Tekoäly ei voi tehdä tilauksia, soittaa tai maksaa puolestasi – mutta se osaa selittää, neuvoa, kirjoittaa ja vastata kysymyksiin erinomaisesti!"
+  }
+];
+
+let nykyinen = 0, pisteet = 0, vastattu = false;
+
+function rakennaPisteet() {
+  const div = document.getElementById('edistyminen');
+  div.innerHTML = '';
+  kysymykset.forEach((_, i) => {
+    const p = document.createElement('div');
+    p.className = 'piste' + (i < nykyinen ? ' tehty' : i === nykyinen ? ' aktiivinen' : '');
+    div.appendChild(p);
+  });
+}
+
+function naytaKysymys() {
+  vastattu = false;
+  const q = kysymykset[nykyinen];
+  document.getElementById('kysymys-nro').textContent = `Kysymys ${nykyinen + 1} / ${kysymykset.length}`;
+  document.getElementById('pisteet-luku').textContent = pisteet;
+  const badge = document.getElementById('osio-badge');
+  badge.textContent = q.osioNimi;
+  badge.className = 'osio-badge ' + (q.osio === 1 ? 'osio-1' : 'osio-2');
+  document.getElementById('kysymys-teksti').textContent = q.kysymys;
+  const alue = document.getElementById('vaihtoehdot-alue');
+  alue.style.flexDirection = (q.tyyppi === 'tosiepaTosi') ? 'row' : 'column';
+  alue.innerHTML = '';
+  q.vaihtoehdot.forEach((v, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'vaihtoehto';
+    btn.textContent = v;
+    btn.onclick = () => vastaa(i);
+    alue.appendChild(btn);
+  });
+  const pal = document.getElementById('palaute-alue');
+  pal.className = 'palaute';
+  pal.textContent = '';
+  document.getElementById('jatka-nappi').style.display = 'none';
+  rakennaPisteet();
+}
+
+function vastaa(valinta) {
+  if (vastattu) return;
+  vastattu = true;
+  const q = kysymykset[nykyinen];
+  const btns = document.querySelectorAll('.vaihtoehto');
+  btns.forEach(b => b.disabled = true);
+  const ok = valinta === q.oikein;
+  btns[valinta].className += ok ? ' oikein' : ' vaarin';
+  if (!ok) btns[q.oikein].className += ' oikein';
+  if (ok) pisteet++;
+  document.getElementById('pisteet-luku').textContent = pisteet;
+  const pal = document.getElementById('palaute-alue');
+  pal.textContent = (ok ? '✓ ' : '✗ ') + (ok ? q.palaute_ok : q.palaute_ei);
+  pal.className = 'palaute nakyvilla ' + (ok ? 'ok' : 'ei');
+  const jatka = document.getElementById('jatka-nappi');
+  jatka.style.display = 'block';
+  jatka.textContent = nykyinen < kysymykset.length - 1 ? 'Seuraava kysymys →' : 'Katso tulokset →';
+}
+
+function seuraava() {
+  nykyinen++;
+  if (nykyinen >= kysymykset.length) { naytaLoppu(); return; }
+  naytaKysymys();
+}
+
+function naytaLoppu() {
+  document.getElementById('nakyma-peli').style.display = 'none';
+  document.getElementById('nakyma-loppu').style.display = 'block';
+  document.getElementById('loppu-pisteet').textContent = pisteet + ' / ' + kysymykset.length;
+  let otsikko, kommentti;
+  if (pisteet >= 9) {
+    otsikko = "Erinomainen tulos!";
+    kommentti = "Sinulla on jo hyvä pohja tekoälyn ymmärtämiseen. Olet valmis kokeilemaan ChatGPT:tä tai Claudea – aloita vaikka pyytämällä apua jonkin viestin kirjoittamiseen!";
+  } else if (pisteet >= 6) {
+    otsikko = "Hyvä suoritus!";
+    kommentti = "Olet oppinut jo paljon tekoälystä. Muutama asia vielä harjoituksessa, mutta olet ehdottomasti valmis tutustumaan tekoälyavustajiin käytännössä.";
+  } else {
+    otsikko = "Hyvä alku!";
+    kommentti = "Tekoäly on uusi aihe ja se vie hetken oppia – ihan sama kuin älypuhelimenkin kanssa alussa. Pelaa uudelleen ja huomaat jo oppineesi!";
+  }
+  document.getElementById('loppu-otsikko').textContent = otsikko;
+  document.getElementById('loppu-kommentti').textContent = kommentti;
+}
+
+function aloitaAlusta() {
+  nykyinen = 0; pisteet = 0;
+  document.getElementById('nakyma-peli').style.display = 'block';
+  document.getElementById('nakyma-loppu').style.display = 'none';
+  naytaKysymys();
+}
+
+naytaKysymys();
+</script>
